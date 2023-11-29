@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Notes App</title>
+    <link rel="icon" type="image/x-icon" href="sticky-notes.png">
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "gilroy";
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(to right, #3498db, #2c3e50);
+        }
+
+        .main{
+            margin:0;
+            padding: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items:initial
+        }
+
+        #app {
+            position: absolute;
+            margin-top: 8%;
+            width: 400px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        #nleft,#nright{
+            display: flex;
+            align-items: center;    
+            gap: 35px;
+        }
+
+        #nleft img{
+            height: 40px;
+        }
+
+        #nav a{
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 11px;
+            color: #fff;
+            letter-spacing: 0.8px;
+            font-weight: 500;
+        }
+        #nav{
+
+            width: 171vh;
+            height: 7vh;
+            background-color: rgb(0, 0,0);
+            background-color: rgba(0,0,0,0.3);
+            pointer-events: all;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px 15px;
+        }
+
+        #app:hover {
+            transform: scale(1.05);
+        }
+
+        #app h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        #notes {
+            margin-bottom: 20px;
+        }
+
+        .note {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            background-color: #fff;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .note:hover {
+            background-color: #f0f0f0;
+        }
+
+        .note span {
+            flex-grow: 1;
+            margin-right: 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .note button {
+            background-color: #e74c3c;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .note button:hover {
+            background-color: #c0392b;
+        }
+
+        #noteInput {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: border-color 0.3s ease;
+        }
+
+        #noteInput:focus {
+            border-color: #3498db;
+        }
+
+        #addBtn {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #addBtn:hover {
+            background-color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <div id="nav">
+            <div id="nleft">
+                <a href="index.html"><img src="sticky-notes.png" alt="notes"></a>
+                <a href="index.html">Home</a>
+                <a href="aboutus.html" >About Us</a>
+            </div>
+            <div id="nright">
+                <a href="contactus.html">Contact Us</a>
+                <a href="login.html">Login</a>
+            </div>
+        </div>
+        <div id="app">
+            <h2>Advanced Notes App</h2>
+            <div id="notes"></div>
+            <input type="text" id="noteInput" placeholder="Add a new note...">
+            <button id="addBtn" onclick="addNote()">Add Note</button>
+        </div>
+        
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            loadNotes();
+
+            document.getElementById('notes').addEventListener('click', function (e) {
+                if (e.target.tagName === 'BUTTON') {
+                    deleteNote(e.target.parentElement);
+                } else if (e.target.tagName === 'SPAN') {
+                    editNoteText(e.target);
+                } else if (e.target.classList.contains('note')) {
+                    editNoteText(e.target.getElementsByTagName('span')[0]);
+                }
+            });
+        });
+
+        function addNote() {
+            var noteInput = document.getElementById("noteInput");
+            var notesContainer = document.getElementById("notes");
+
+            if (noteInput.value.trim() !== "") {
+                var note = createNoteElement(noteInput.value);
+                notesContainer.appendChild(note);
+
+                // Save note to local storage
+                saveNotes();
+
+                // Clear input field
+                noteInput.value = "";
+            }
+        }
+
+        function createNoteElement(text) {
+            var note = document.createElement("div");
+            note.className = "note";
+
+            var noteText = document.createElement("span");
+            noteText.innerText = text;
+
+            var deleteBtn = document.createElement("button");
+            deleteBtn.innerText = "Delete";
+
+            note.appendChild(noteText);
+            note.appendChild(deleteBtn);
+
+            return note;
+        }
+
+        function deleteNote(noteElement) {
+            
+            const response = confirm("Are you sure you want to delete this note?");
+            if (response) {
+                console.log("Ok was pressed");
+            } else {
+               console.log("Cancel was pressed");
+            }
+            noteElement.remove();
+            saveNotes();
+
+        }
+
+        function editNoteText(noteElement) {
+            var newText = prompt("Edit note:", noteElement.innerText);
+
+            if (newText !== null) {
+                noteElement.innerText = newText;
+
+                saveNotes();
+            }
+        }
+
+        function saveNotes() {
+            var notesContainer = document.getElementById("notes");
+            var notes = notesContainer.getElementsByClassName("note");
+
+            var notesArray = [];
+
+            for (var i = 0; i < notes.length; i++) {
+                notesArray.push(notes[i].getElementsByTagName("span")[0].innerText);
+            }
+
+            localStorage.setItem("notes", JSON.stringify(notesArray));
+        }
+
+        function loadNotes() {
+            var notesContainer = document.getElementById("notes");
+            var savedNotes = localStorage.getItem("notes");
+
+            if (savedNotes) {
+                var notesArray = JSON.parse(savedNotes);
+
+                for (var i = 0; i < notesArray.length; i++) {
+                    var note = createNoteElement(notesArray[i]);
+                    notesContainer.appendChild(note);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
